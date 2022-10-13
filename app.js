@@ -4,53 +4,70 @@
 const express = require("express");
 // body parser needed for form post data recive 
 const bodyParser = require("body-parser");
+const date = require( __dirname + "/date.js");
+
+
 
 
 const app = express();
 
 var items = ["Buy Food", "Cook Food", "Eat Food"];
+var workItems = [];
 
 app.set("view engine", "ejs");
 
 // we are saying file to use bodyparser because we need look for newItem 
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.use(express.static("public"));
+
 
 
 app.get("/", function(req, res) {
 
-    var today = new Date();
-    var currentDay = today.getDay();
-    var day = "";
-    var today = new Date();
-    var options = {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    };
-    var day = today.toLocaleDateString("en-US", options);
+    // var today = new Date();
+    // var currentDay = today.getDay();
+    // var day = "";
+    
+    // let day = date();
+    let day = date.getDate();
+
+
     res.render("list", {
-        kindOfDay: day,
+        listTitle: day,
         newListItems: items
     });
-
-
-    // const data = {
-    //     items: [],
-    // };
-    // res.render('index', data);
-
 });
 
 
 app.post("/", function(req, res) {
+
     var item = req.body.newItem ;
-    // console.log(item);
-    items.push(item);
-    res.redirect("/");
+
+    if (req.body.list === "Work") {
+        workItems.push(item);
+        res.redirect("/work");
+    } else {
+        items.push(item);
+        res.redirect("/");
+    }
+
+    
 });
 
+app.get("/work", function(req, res) {
+    res.render("list", {listTitle: "Work List", newListItems: workItems});
+});
 
+app.get("/about", function(req, res) {
+    res.render("about");
+})
+
+app.post("/", function(req, res) {
+    var item = req.body.newItem;
+    workItems.push(item);
+    res.redirect("/");
+});
 
 
 app.listen(3000, function() {
